@@ -3,8 +3,8 @@ use minifb::{WindowOptions, Window, Key, Scale, ScaleMode};
 mod conway;
 use conway::*;
 
-const WIDTH:usize = 450;
-const HEIGHT:usize = 200;
+const WIDTH:usize = 450*2;
+const HEIGHT:usize = 200*2;
 fn main(){
     // Setting up the window
 
@@ -16,7 +16,7 @@ fn main(){
             borderless: false,
             title: true,
             resize: false,
-            scale: Scale::X4,
+            scale: Scale::X2,
             scale_mode: ScaleMode::Stretch,
             ..Default::default()
         },
@@ -32,6 +32,9 @@ fn main(){
     let mut buffer: Vec<u32> = vec![0; WIDTH * HEIGHT];
 
     while window.is_open() && !window.is_key_down(Key::Escape) {
+        if window.is_key_released(Key::R){
+            simulation.randomize_world();
+        }
         if paused{
             window.update();
             if !window.is_key_down(Key::X){

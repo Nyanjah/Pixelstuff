@@ -44,23 +44,28 @@ impl Simulation {
             },
             population: 0,
         };
-        // DEBUG- RANDOM INITIALIZATION OF CELLS
+        sim.randomize_world();
+        return sim;
+    }
+
+    pub fn randomize_world(&mut self) {
+        self.clear();
         let mut rng = rand::thread_rng();
-        for x in 0..width {
-            for y in 0..height {
+        for x in 0..self.world.width {
+            for y in 0..self.world.height {
                 if rng.gen_range(0..=1) == 0 {
-                    sim.flip_cell(x as usize, y as usize);
+                    self.flip_cell(x as usize, y as usize);
                 };
             }
         }
-        let buffer = &mut sim.world.grid_buffer;
-        for (buffer_row, world_row) in buffer.iter().zip(sim.world.grid.iter_mut()) {
+        let buffer = &mut self.world.grid_buffer;
+        for (buffer_row, world_row) in buffer.iter().zip(self.world.grid.iter_mut()) {
             for (neighbor_count, cell) in buffer_row.iter().zip(world_row.iter_mut()) {
                 cell.neighbor_count = *neighbor_count;
             }
         }
-        return sim;
     }
+
 
     pub fn get_name(&self) -> &str {
         return &self.name;
@@ -80,6 +85,8 @@ impl Simulation {
                 }
             }
         }
+        self.population = 0;
+        self.world.grid_buffer.iter_mut().for_each(|row|row.fill(0));
     }
 
     pub fn get_world(&self) -> &World {
