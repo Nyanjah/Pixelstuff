@@ -101,7 +101,7 @@ impl Simulation {
         // Updating neighbor counts in buffer
         for neighbor_x in x.saturating_sub(1)..=(x + 1).min(self.world.width as usize - 1) {
             for neighbor_y in y.saturating_sub(1)..=(y + 1).min(self.world.height as usize - 1) {
-                if (neighbor_x == x) && (neighbor_y == y) {
+                if !((neighbor_x == x) && (neighbor_y == y)) {
                     if cell.alive {
                         buffer[neighbor_x][neighbor_y] += 1
                     } else {
