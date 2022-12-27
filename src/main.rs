@@ -1,4 +1,4 @@
-use minifb::{WindowOptions, Window, Key, Scale, ScaleMode};
+use minifb::*;
 
 mod conway;
 use conway::*;
@@ -7,7 +7,6 @@ const WIDTH:usize = 450*2;
 const HEIGHT:usize = 200*2;
 fn main(){
     // Setting up the window
-
     let mut window = Window::new(
         "Conway's Game of Life - ESC to exit",
         WIDTH,
@@ -15,15 +14,15 @@ fn main(){
         WindowOptions {
             borderless: false,
             title: true,
-            resize: false,
+            resize: true,
             scale: Scale::X2,
             scale_mode: ScaleMode::Stretch,
             ..Default::default()
         },
-    )
-    .unwrap_or_else(|e| {
+    ).unwrap_or_else(|e| {
         panic!("{}", e);
     });
+
     // Limit to update rate to retain  ~1 sec / frame
     window.limit_update_rate(Some(std::time::Duration::from_secs_f32(0.02)));
 
@@ -55,7 +54,12 @@ fn main(){
         for y in (0..HEIGHT).rev(){
             for x in 0..WIDTH{
                 let cell_is_alive = world_state.grid[x][y].alive;
-                buffer.push(if cell_is_alive {255 as u32} else {(255 as u32) << 16 | (255 as u32)<<8 | (255 as u32)});
+                let count = world_state.grid[x][y].neighbor_count;
+                buffer.push({
+                    if cell_is_alive && count == 2 {(255 as u32) << 8}
+                    else if cell_is_alive && count == 3 {(255 as u32) << 16}
+                    else if cell_is_alive {(255 as u32)}
+                    else{0}});
             }
         }
         
