@@ -117,6 +117,60 @@ impl Simulation {
         }
     }
 
+    pub fn insert_life(&mut self, x: usize, y: usize) {
+        let buffer = &mut self.world.grid_buffer;
+        let cell = &mut self.world.grid[x][y];
+        // If the cell is dead
+        if !cell.alive{
+            // Revive it!
+            cell.alive = true;
+            // Updating neighbor counts in buffer
+            for neighbor_x in x.saturating_sub(1)..=(x + 1).min(self.world.width as usize - 1) {
+                for neighbor_y in y.saturating_sub(1)..=(y + 1).min(self.world.height as usize - 1) {
+                    if !((neighbor_x == x) && (neighbor_y == y)) {
+                        buffer[neighbor_x][neighbor_y] += 1
+                    }
+                }
+            }
+            self.population += 1;
+            // Apply the changes in the buffer to the real world
+            let buffer = &mut self.world.grid_buffer;
+            for (buffer_row, world_row) in buffer.iter().zip(self.world.grid.iter_mut()) {
+                for (neighbor_count, cell) in buffer_row.iter().zip(world_row.iter_mut()) {
+                    cell.neighbor_count = *neighbor_count;
+                }
+            }
+        }
+    }
+
+    pub fn delete_life(&mut self, x: usize, y: usize) {
+        let buffer = &mut self.world.grid_buffer;
+        let cell = &mut self.world.grid[x][y];
+        // If the cell is dead
+        if cell.alive{
+            // Revive it!
+            cell.alive = false;
+            // Updating neighbor counts in buffer
+            for neighbor_x in x.saturating_sub(1)..=(x + 1).min(self.world.width as usize - 1) {
+                for neighbor_y in y.saturating_sub(1)..=(y + 1).min(self.world.height as usize - 1) {
+                    if !((neighbor_x == x) && (neighbor_y == y)) {
+                        buffer[neighbor_x][neighbor_y] -= 1
+                    }
+                }
+            }
+            self.population -= 1;
+            // Apply the changes in the buffer to the real world
+            let buffer = &mut self.world.grid_buffer;
+            for (buffer_row, world_row) in buffer.iter().zip(self.world.grid.iter_mut()) {
+                for (neighbor_count, cell) in buffer_row.iter().zip(world_row.iter_mut()) {
+                    cell.neighbor_count = *neighbor_count;
+                }
+            }
+        }
+    }
+
+
+
     pub fn step(&mut self) {
         // The rules of Conway's game of life:
 
